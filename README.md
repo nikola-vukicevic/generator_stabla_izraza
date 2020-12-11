@@ -1,5 +1,4 @@
 # generator_stabla_izraza
-Generator stabla izraza (sa metodama za prikaz čvorova)
 
 JS generator Stabla izraraza (sa opcijama za pretvaranje infiksnog zapisa u stablo izraza i prikaz čvorova).
 
