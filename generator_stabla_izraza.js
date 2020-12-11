@@ -1,5 +1,7 @@
 /* -------------------------------------------------------------------------- */
-/* - CONFIG:                                                                - */
+/* Generator Stabla izraza (sa opcijama za pretvaranje infiksne notacije u    */
+/* stablo izraza i prikaz čvorova                                             */
+/* Copyright (C) 2020. Nikola Vukićević                                       */
 /* -------------------------------------------------------------------------- */
 
 const SVG_NS            = "http://www.w3.org/2000/svg";
