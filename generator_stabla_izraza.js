@@ -71,22 +71,22 @@ var   fontOffsetYPostfiks  = 96;
 
 // SVG_STABLO
 
-var   svgPlatnoSirina      = "100%";
-var   svgPlatnoVisina      = "800px";
-var   stabloMarginaX       = 36;
-var   stabloOffsetY        = 160;
-var   razmakX              = 32;
-var   razmakY              = 56;
-var   kriticnaVisinaRazmak = 4;
-var   dodatniRazmak        = 2;
-var   KOREKCIJA            = 1000;
+let   svgPlatnoSirina      = "100%";
+let   svgPlatnoVisina      = "800px";
+let   stabloMarginaX       = 36;
+let   stabloOffsetY        = 160;
+let   razmakX              = 32;
+let   razmakY              = 56;
+let   kriticnaVisinaRazmak = 4;
+let   dodatniRazmak        = 2;
+let   KOREKCIJA            = 1000;
 
 // GLAVNE STRUKTURE PODATAKA
 
-var   RED;
-var   STEK;
-var   STABLO;
-var   ISPIS;
+let   RED;
+let   STEK;
+let   STABLO;
+let   ISPIS;
 
 class Cvor {
 	constructor (tekstSadrzaj) {
