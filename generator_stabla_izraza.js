@@ -5,6 +5,8 @@
 /* -------------------------------------------------------------------------- */
 
 const SVG_NS            = "http://www.w3.org/2000/svg";
+const SVG_PLATNO_ID     = "svg_platno";
+const POLJE_IZRAZ       = "forma_ast_svg_izraz";
 
 // IVICE
 
@@ -129,32 +131,39 @@ function popunjavanjeRedaOperand(c) {
 }
 
 function popunjavanjeRedaPlusMinus(c) {
+	
 	if(STEK.length == 0 || STEK[STEK.length - 1].tekstSadrzaj == "(") {
 		cvor = new Cvor(c);
 	    STEK.push(cvor);
+	    return;
 	}
-	else {
-        while(STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
-	    	RED.push(STEK.pop());
-        }
-	    cvor = new Cvor(c);
-	    STEK.push(cvor);
-	}		
+	
+	while(STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
+    	RED.push(STEK.pop());
+    }
+	
+	cvor = new Cvor(c);
+	STEK.push(cvor);
 }
 
 function popunjavanjeRedaPutaKroz(c) {
-    if(STEK.length == 0 || STEK[STEK.length - 1].tekstSadrzaj == "(" ||
-       STEK[STEK.length - 1].tekstSadrzaj == '+' || STEK[STEK.length - 1].tekstSadrzaj == "-") {
+    
+    if(STEK.length == 0 ||
+       STEK[STEK.length - 1].tekstSadrzaj == "(" ||
+       STEK[STEK.length - 1].tekstSadrzaj == '+' ||
+       STEK[STEK.length - 1].tekstSadrzaj == "-") {
+    	
     	cvor = new Cvor(c);
         STEK.push(cvor);
+        return;
     }
-    else {
-        while(STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
-        	RED.push(STEK.pop());
-        }
-        cvor = new Cvor(c);
-        STEK.push(cvor);
+    
+    while(STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
+    	RED.push(STEK.pop());
     }
+    
+    cvor = new Cvor(c);
+    STEK.push(cvor);
 }
 
 function popunjavanjeRedaOtvorenaZagrada(c) {
@@ -552,41 +561,8 @@ function generisanjeNotacijeInfiks() {
 	return s.substring(0, s.length-1);
 }
 
-function parseAST() {
-	let svg_platno = document.getElementById("svg_platno");
-	let sirina     = svg_platno.clientWidth;
-	svg_platno.style.maxWidth = sirina + "px";
-
-	var svg1   = document.createElementNS(SVG_NS, "svg");
-	let izraz  = document.getElementById("forma_ast_svg_izraz").value;
-	
-	popunjavanjeReda(izraz);
-	generisanjeStabla();
-	azuriranjeStablaSirinaVisina(STABLO);
-	azuriranjeStablaXY();
-	ispisTekstaSVG(svg1);
-	crtanjeStabla(svg1);
-	
-	//alert(generisanjeNotacijePostfiks());
-	//alert(generisanjeNotacijePrefiks());
-	//alert(generisanjeNotacijeInfiks());
-	
-	svgPlatnoSirina = ((STABLO.sirinaLevi + STABLO.sirinaDesni) * razmakX +
-		              2 * stabloMarginaX+
-		              2 * krugPoluprecnik2) + "px";
-	svgPlatnoVisina = (STABLO.visina * razmakY + stabloOffsetY) + "px";
-	
-	svg1.setAttribute("width",  svgPlatnoSirina);
-	svg1.setAttribute("height", svgPlatnoVisina);
-    document.getElementById("svg_platno").innerHTML = "";
-    document.getElementById("svg_platno").appendChild(svg1);
-	
-	//citanjeStabla();
-	//citanjeReda();
-}
-
 function ispisTekstaSVG(svgObjekat) {
-	var tekst;
+	let tekst;
 	// INFIKS
 	tekst = document.createElementNS(SVG_NS, "text");
     tekst.setAttribute("x",           fontOffsetXInfiks);
@@ -629,7 +605,7 @@ function crtanjeCvora(svgObjekat, cvor) {
 
     // LINIJA - LEVA
 
-    var linijaLeva = document.createElementNS(SVG_NS, "line");
+    let linijaLeva = document.createElementNS(SVG_NS, "line");
 
     linijaLeva.setAttribute("x1",           cvor.X);
     linijaLeva.setAttribute("y1",           cvor.Y);
@@ -640,7 +616,7 @@ function crtanjeCvora(svgObjekat, cvor) {
 
     // LINIJA - DESNA
 
-    var linijaDesna = document.createElementNS(SVG_NS, "line");
+    let linijaDesna = document.createElementNS(SVG_NS, "line");
 
     linijaDesna.setAttribute("x1",           cvor.X);
     linijaDesna.setAttribute("y1",           cvor.Y);
@@ -651,7 +627,7 @@ function crtanjeCvora(svgObjekat, cvor) {
 
     // KRUG
 
-    var krug = document.createElementNS(SVG_NS, "circle");
+    let krug = document.createElementNS(SVG_NS, "circle");
 
     krug.setAttribute("cx",           cvor.X);
     krug.setAttribute("cy",           cvor.Y);
@@ -662,14 +638,16 @@ function crtanjeCvora(svgObjekat, cvor) {
 
     // TEKST
 
-    var tekst       = document.createElementNS(SVG_NS, "text");
-    var koordinataY = cvor.Y + ((cvor.tip == 1)? fontOffsetY1  : fontOffsetY2);
+    let tekst       = document.createElementNS(SVG_NS, "text");
+    let koordinataY = cvor.Y + ((cvor.tip == 1)? fontOffsetY1  : fontOffsetY2);
+    
     if(cvor.tekstSadrzaj == "g" || cvor.tekstSadrzaj == "p" ||
        cvor.tekstSadrzaj == "q" || cvor.tekstSadrzaj == "y" ||
        cvor.tekstSadrzaj == "c" || cvor.tekstSadrzaj == "e" ||
        cvor.tekstSadrzaj == "a") {
     	koordinataY += ((cvor.tip == 1)? fontOffsetYgpqy1  : fontOffsetYgpqy2);
     }
+    
     tekst.setAttribute("x", cvor.X);
     tekst.setAttribute("y", koordinataY);
     tekst.setAttribute("font-family",       ((cvor.tip == 1)? fontFamilija1 : fontFamilija2));
@@ -684,4 +662,43 @@ function crtanjeCvora(svgObjekat, cvor) {
     svgObjekat.appendChild(linijaDesna);
     svgObjekat.appendChild(krug);
     svgObjekat.appendChild(tekst);
+}
+
+function initAstDemo() {
+	let izraz  = document.getElementById("forma_ast_svg_izraz");
+	izraz.value = "a*b+c";
+	parseAST();
+}
+
+function parseAST() {
+	let svg_platno = document.getElementById("svg_platno");
+	let sirina     = svg_platno.clientWidth;
+	svg_platno.style.maxWidth = sirina + "px";
+
+	let svg1   = document.createElementNS(SVG_NS, "svg");
+	let izraz  = document.getElementById("forma_ast_svg_izraz").value;
+	
+	popunjavanjeReda(izraz);
+	generisanjeStabla();
+	azuriranjeStablaSirinaVisina(STABLO);
+	azuriranjeStablaXY();
+	ispisTekstaSVG(svg1);
+	crtanjeStabla(svg1);
+	
+	//alert(generisanjeNotacijePostfiks());
+	//alert(generisanjeNotacijePrefiks());
+	//alert(generisanjeNotacijeInfiks());
+	
+	svgPlatnoSirina = ((STABLO.sirinaLevi + STABLO.sirinaDesni) * razmakX +
+		              2 * stabloMarginaX+
+		              2 * krugPoluprecnik2) + "px";
+	svgPlatnoVisina = (STABLO.visina * razmakY + stabloOffsetY) + "px";
+	
+	svg1.setAttribute("width",  svgPlatnoSirina);
+	svg1.setAttribute("height", svgPlatnoVisina);
+    document.getElementById("svg_platno").innerHTML = "";
+    document.getElementById("svg_platno").appendChild(svg1);
+	
+	//citanjeStabla();
+	//citanjeReda();
 }
