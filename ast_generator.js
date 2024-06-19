@@ -1,96 +1,10 @@
 /* -------------------------------------------------------------------------- */
-/* Generator Stabla izraza (sa opcijama za pretvaranje infiksne notacije u    */
-/* stablo izraza i prikaz čvorova                                             */
+/* Generator Stabla izraza (sa opcijama za pretvaranje                        */
+/* infiksne notacije u stablo izraza i prikaz čvorova)                        */
 /* Copyright (C) 2020. codeblog.rs                                            */
 /* -------------------------------------------------------------------------- */
-const CONFIG = {
-	svgNs:      "http://www.w3.org/2000/svg",
-	platnoId:   "svg_platno",
-	poljeIzraz: "forma_ast_svg_izraz",
-
-	// IVICE
-
-	ivicaDebljina:     1.5,
-	ivicaBoja:         "#000",
-
-	// KRUGOVI
-
-	krugPoluprecnik1:   16,
-	krugIvicaDebljina1: 0.5,
-	krugIvicaBoja1:     "#000",
-	// krugIspuna1:        "#083880",
-	krugIspuna1:        "#275190",
-
-	krugPoluprecnik2:   24,
-	krugIvicaDebljina2: 2.0,
-	krugIvicaBoja2:     "#000",
-	// krugIspuna2:        "#1070ff",
-	krugIspuna2:        "#849bc0",
-
-	// TEKST (U KRUGOVIMA)
-
-	fontFamilija1:     "Montserrat, sans-serif",
-	fontFamilija1:     "Inconsolata, Consolas, monospace",
-	fontVelicina1:     "20px",
-	fontDebljina1:     700,
-	fontBoja1:         "#fff",
-	fontOffsetY1:      -1,
-	fontOffsetYgpqy1:  -1,
-
-	fontFamilija2:     "Montserrat, sans-serif",
-	fontFamilija2:     "Inconsolata, Consolas, monospace",
-	fontVelicina2:     "24px",
-	fontDebljina2:     400,
-	fontBoja2:         "#fff",
-	fontOffsetY2:      -1,
-	fontOffsetYgpqy2:  -3,
-
-	// TEKST NOTACIJE
-
-	fontFamilijaInfiks:   "Montserrat-Medium, sans-serif",
-	fontFamilijaInfiks:   "Inconsolata, Consolas, monospace",
-	fontVelicinaInfiks:   "22px",
-	fontDebljinaInfiks:   700,
-	fontBojaInfiks:       "#1070ff",
-	fontOffsetXInfiks:    20,
-	fontOffsetYInfiks:    32,
-
-	fontFamilijaPrefiks:  "Montserrat-Medium, sans-serif",
-	fontFamilijaPrefiks:  "Inconsolata, Consolas, monospace",
-	fontVelicinaPrefiks:  "22px",
-	fontDebljinaPrefiks:  700,
-	fontBojaPrefiks:      "#1070ff",
-	fontOffsetXPrefiks:   20,
-	fontOffsetYPrefiks:   64,
-
-	fontFamilijaPostfiks: "Montserrat-Medium, sans-serif",
-	fontFamilijaPostfiks: "Inconsolata, Consolas, monospace",
-	fontVelicinaPostfiks: "22px",
-	fontDebljinaPostfiks: 700,
-	fontBojaPostfiks:     "#1070ff",
-	fontOffsetXPostfiks:  20,
-	fontOffsetYPostfiks:  96,
-}
-
-let SVG_PLATNO = {
-	sirina:               "100%",
-	visina:               "800px",
-	marginaX:             36,
-	offsetY:              160,
-	razmakX:              32,
-	razmakY:              56,
-	kriticnaVisinaRazmak: 4,
-	dodatniRazmak:        2,
-	korekcija:            1000
-}
-
-let STRUCT = {
-	red:    null,
-	stek:   null,
-	stablo: null,
-	ispis:  null
-}
-
+import { CONFIG, SVG_PLATNO, STRUCT } from './ast_config.js'
+/* -------------------------------------------------------------------------- */
 class Cvor {
 	constructor (tekstSadrzaj) {
 		this.tekstSadrzaj  = tekstSadrzaj;
@@ -98,9 +12,9 @@ class Cvor {
 		// tip : 1 - operator
         //		 2 - operand
 
-        // prioritet : 0 - operand (a-z)
+        // prioritet : 0 - operand  ('a'-'z')
         //		       1 - operator ("+" ili "-")
-        //		       2 - operator ("+" ili "-")
+        //		       2 - operator ("*" ili "/")
 
 		switch(this.tekstSadrzaj) {
 			case "+" : this.tip = 1; this.prioritet = 1; break;
@@ -134,15 +48,14 @@ function popunjavanjeRedaOperand(c, red) {
 }
 
 function popunjavanjeRedaPlusMinus(c, red, stek) {
-	
-	if(stek.length == 0 || stek[stek.length - 1].tekstSadrzaj == "(") {
+	if (stek.length == 0 || stek[stek.length - 1].tekstSadrzaj == "(") {
 		let cvor = new Cvor(c);
 	    stek.push(cvor);
 	    return;
 	}
 	
-	// while(STEK.length > 0 && (STEK[STEK.length - 1].tekstSadrzaj == "+" || STEK[STEK.length - 1].tekstSadrzaj == "-")) {
-	while(stek.length > 0 && stek[stek.length - 1].tekstSadrzaj != "(") {
+	// while (STEK.length > 0 && (STEK[STEK.length - 1].tekstSadrzaj == "+" || STEK[STEK.length - 1].tekstSadrzaj == "-")) {
+	while (stek.length > 0 && stek[stek.length - 1].tekstSadrzaj != "(") {
     	red.push(stek.pop());
     }
 
@@ -151,8 +64,7 @@ function popunjavanjeRedaPlusMinus(c, red, stek) {
 }
 
 function popunjavanjeRedaPutaKroz(c, red, stek) {
-    
-    if(stek.length == 0 ||
+    if (stek.length == 0 ||
        stek[stek.length - 1].tekstSadrzaj == "(" ||
        stek[stek.length - 1].tekstSadrzaj == '+' ||
        stek[stek.length - 1].tekstSadrzaj == "-") {
@@ -162,8 +74,8 @@ function popunjavanjeRedaPutaKroz(c, red, stek) {
         return;
     }
     
-    // while(STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
-    while(stek.length > 0 && (stek[stek.length - 1].tekstSadrzaj == "*" || stek[stek.length - 1].tekstSadrzaj == "/")) {
+    // while (STEK.length > 0 && STEK[STEK.length - 1].tekstSadrzaj != "(") {
+    while (stek.length > 0 && (stek[stek.length - 1].tekstSadrzaj == "*" || stek[stek.length - 1].tekstSadrzaj == "/")) {
     	red.push(stek.pop());
     }
     
@@ -179,7 +91,7 @@ function popunjavanjeRedaOtvorenaZagrada(c, red, stek) {
 function popunjavanjeRedaZatvorenaZagrada(c, red, stek) {
     let c2 = stek[stek.length - 1];
 
-    while(c2.tekstSadrzaj != '(') {
+    while (c2.tekstSadrzaj != '(') {
         red.push(c2);
         stek.pop();
         c2 = stek[stek.length - 1];
@@ -196,10 +108,10 @@ function popunjavanjeReda(s, obj) {
 	let d = s.length;
 	let cvor;
 
-	for(i = 0; i < d; i++) {
+	for (i = 0; i < d; i++) {
         let c = s[i];
 
-        if((c >= 'a' && c <= 'z') ||
+        if ((c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z')) {
             popunjavanjeRedaOperand(c, obj.red);
             continue;
@@ -216,21 +128,21 @@ function popunjavanjeReda(s, obj) {
         }
     }
 
-    while(stek.length > 0) {
+    while (stek.length > 0) {
         red.push(stek.pop());
     }
 }
 
 function generisanjeStabla(obj) {
-	let red    = obj.red;
-	let stek   = obj.stek;
-	let d      = red.length;
-	let i;
-	stek  = [];
+	let red  = obj.red;
+	let stek = obj.stek;
+	let d    = red.length;
+	let i, op_1, op_2, novi_cvor;
+	stek  = [ ];
 
-	for(i = 0; i < d; i++) {
+	for (i = 0; i < d; i++) {
 		let cv = red[i];
-		if(cv.tip == 2) {
+		if (cv.tip == 2) {
 			stek.push(cv);
 		}
 		else {
@@ -249,15 +161,14 @@ function generisanjeStabla(obj) {
 }
 
 function pronalazenjeMaxXRed(red, platno) {
-	let i;
-	let m;
+	let i, m, cv;
 	let max = -1000000000;
 
-	for(i = 0; i < red.length; i++) {
+	for (i = 0; i < red.length; i++) {
 		cv = red[i];
-		if(cv.xPom > max){
+		if (cv.xPom > max){
 			max = cv.xPom;
-			if(cv.sledeciDesni > platno.kriticnaVisinaRazmak) {
+			if (cv.sledeciDesni > platno.kriticnaVisinaRazmak) {
 				m = platno.dodatniRazmak;
 			}
 			else {
@@ -270,15 +181,14 @@ function pronalazenjeMaxXRed(red, platno) {
 }
 
 function pronalazenjeMinXRed(red, platno) {
-	let i;
-	let m;
+	let i, m, cv;
 	let min = 1000000000;
 
-	for(i = 0; i < red.length; i++) {
+	for (i = 0; i < red.length; i++) {
 		cv = red[i];
-		if(cv.xPom < min){
+		if (cv.xPom < min){
 			min = cv.xPom;
-			if(cv.sledeciLevi > platno.kriticnaVisinaRazmak) {
+			if (cv.sledeciLevi > platno.kriticnaVisinaRazmak) {
 				m = platno.dodatniRazmak;
 			}
 			else {
@@ -291,17 +201,19 @@ function pronalazenjeMinXRed(red, platno) {
 }
 
 function ucitavanjeDonjegSprata(red, redPom) {
-	if(red.length == 0) return;
+	let cvPom;
+
+	if (red.length == 0) return;
 		
-	for(i = 0; i < red.length; i++) {
+	for (i = 0; i < red.length; i++) {
 		cvPom = red[i];
 				
-		if(cvPom.levi != null) {
+		if (cvPom.levi != null) {
 			cvPom.levi.xPom = cvPom.xPom - cvPom.sledeciLevi;
 			redPom.push(cvPom.levi);
 		}
 		
-		if(cvPom.desni != null) {
+		if (cvPom.desni != null) {
 			cvPom.desni.xPom = cvPom.xPom + cvPom.sledeciDesni;
 			redPom.push(cvPom.desni);
 		}
@@ -312,10 +224,10 @@ function azuriranjeSirineCvora(cvor, platno) {
 	let imaDece  = true;
 	let razmak   = 0;
 	let dodatak  = 0;
-	let redLe    = [];
-	let redDe    = [];
-	let redLePom = [];
-	let redDePom = [];
+	let redLe    = [ ];
+	let redDe    = [ ];
+	let redLePom = [ ];
+	let redDePom = [ ];
 
 	cvor.levi.xPom  = 0;
 	cvor.desni.xPom = 0;
@@ -327,13 +239,13 @@ function azuriranjeSirineCvora(cvor, platno) {
 		let max_X_L  = pronalazenjeMaxXRed(redLe, platno);
 		let dodatakL = parseInt(Math.floor(max_X_L / platno.korekcija));
 		max_X_L      = max_X_L % platno.korekcija;
-		console.log("max_X_L: " + max_X_L);
+		// console.log("max_X_L: " + max_X_L);
 
 		let max_X_D  = pronalazenjeMinXRed(redDe, platno);
 		let dodatakD = parseInt(Math.floor(max_X_D / platno.korekcija));
 		max_X_D      = max_X_D % platno.korekcija;
 
-		if(max_X_L + max_X_D > razmak) {
+		if (max_X_L + max_X_D > razmak) {
 			razmak  = max_X_L + max_X_D;
 			dodatak = dodatakL + dodatakD;
 		}
@@ -343,12 +255,12 @@ function azuriranjeSirineCvora(cvor, platno) {
 
 		redLe    = redLePom;
 		redDe    = redDePom;
-		redLePom = [];
-		redDePom = [];
+		redLePom = [ ];
+		redDePom = [ ];
 		
 		imaDece = redLe. length > 0 && redDe.length > 0;
 	}
-	while(imaDece);
+	while (imaDece);
 
 	razmak   += dodatak;
 	let levi  = parseInt(Math.ceil(razmak / 2));
@@ -359,7 +271,7 @@ function azuriranjeSirineCvora(cvor, platno) {
 }
 
 function procenaSirine(cvor, platno) {
-	if(cvor.levi.visina == 1 || cvor.desni.visina == 1) {
+	if (cvor.levi.visina == 1 || cvor.desni.visina == 1) {
 		cvor.sledeciLevi  =
 		cvor.sledeciDesni = 1;
 	}
@@ -368,7 +280,7 @@ function procenaSirine(cvor, platno) {
 }
 
 function azuriranjeStablaSirinaVisina(cvor, platno) {
-	if(cvor       == null ||
+	if (cvor       == null ||
 	   cvor.levi  == null ||
 	   cvor.desni == null) return;
 
@@ -382,11 +294,11 @@ function azuriranjeStablaSirinaVisina(cvor, platno) {
 	cvor.sirinaLevi  = cvor.sledeciLevi  + cvor.levi.sirinaLevi;
 	cvor.sirinaDesni = cvor.sledeciDesni + cvor.desni.sirinaDesni;
 	
-	if(cvor.desni.sirinaLevi - 1 > cvor.sirinaLevi) {
+	if (cvor.desni.sirinaLevi - 1 > cvor.sirinaLevi) {
 		cvor.sirinaLevi = cvor.desni.sirinaLevi - 1;
 	}
 	
-	if(cvor.levi.sirinaDesni - 1 > cvor.sirinaDesni) {
+	if (cvor.levi.sirinaDesni - 1 > cvor.sirinaDesni) {
 		cvor.sirinaDesni = cvor.levi.sirinaDesni - 1;
 	}
 
@@ -402,7 +314,7 @@ function azuriranjeStablaSirinaVisina(cvor, platno) {
 function azuriranjeStablaXY(red, stek, stablo, platno, config) {
 	let visinaY = 1;
 	let i;
-	red = [];
+	red = [ ];
 	
 	stablo.X = platno.marginaX + config.krugPoluprecnik2 + stablo.sirinaLevi * platno.razmakX;
 	stablo.Y = platno.offsetY  +                           (visinaY - 1)     * platno.razmakY;
@@ -412,14 +324,14 @@ function azuriranjeStablaXY(red, stek, stablo, platno, config) {
 		         STABLO.sirinaDesni);
 	//*/
 
-	if(stablo.levi != null) {
+	if (stablo.levi != null) {
 		stablo.levi.predakX       =  stablo.X;
 		stablo.levi.predakY       =  stablo.Y;
 		stablo.levi.predakOffsetX = -stablo.sledeciLevi * platno.razmakX;
 		red.push(stablo.levi);
 	}
 	
-	if(stablo.desni != null) {
+	if (stablo.desni != null) {
 		stablo.desni.predakX       = stablo.X;
 		stablo.desni.predakY       = stablo.Y;
 		stablo.desni.predakOffsetX = stablo.sledeciDesni * platno.razmakX;
@@ -428,22 +340,22 @@ function azuriranjeStablaXY(red, stek, stablo, platno, config) {
 	
 	visinaY++;
 
-	while(red.length > 0) {
-		let red_pom = [];
+	while (red.length > 0) {
+		let red_pom = [ ];
 
-		for(i = 0; i < red.length; i++) {
+		for (i = 0; i < red.length; i++) {
 			let cv_pom = red[i];
 			cv_pom.X = cv_pom.predakX + cv_pom.predakOffsetX;
 			cv_pom.Y = cv_pom.predakY + platno.razmakY;
 
-			if(cv_pom.levi != null) {
+			if (cv_pom.levi != null) {
 				cv_pom.levi.predakX       = cv_pom.X;
 				cv_pom.levi.predakY       = cv_pom.Y;
 				cv_pom.levi.predakOffsetX = -cv_pom.sledeciLevi * platno.razmakX;
 				red_pom.push(cv_pom.levi);
 			}
 
-			if(cv_pom.desni != null) {
+			if (cv_pom.desni != null) {
 				cv_pom.desni.predakX       = cv_pom.X;
 				cv_pom.desni.predakY       = cv_pom.Y;
 				cv_pom.desni.predakOffsetX = cv_pom.sledeciDesni * platno.razmakX;
@@ -457,7 +369,7 @@ function azuriranjeStablaXY(red, stek, stablo, platno, config) {
 			//*/
 		}
 
-		red = [];
+		red = [ ];
 		red = red_pom;
 		visinaY++;
 	}
@@ -466,25 +378,25 @@ function azuriranjeStablaXY(red, stek, stablo, platno, config) {
 function crtanjeStabla(svgObjekat, obj, platno, config) {
 	let i;
 	let visinaY = 1;
-	obj.red = [];
+	obj.red = [ ];
 	obj.red.push(obj.stablo);
 
-	while(obj.red.length > 0) {
-		let red_pom = [];
+	while (obj.red.length > 0) {
+		let red_pom = [ ];
 
-		for(i = 0; i < obj.red.length; i++) {
+		for (i = 0; i < obj.red.length; i++) {
 			crtanjeCvora(svgObjekat, obj.red[i], platno, config);
 			
-			if(obj.red[i].levi != null) {
+			if (obj.red[i].levi != null) {
 				red_pom.push(obj.red[i].levi);
 			}
 
-			if(obj.red[i].desni != null) {
+			if (obj.red[i].desni != null) {
 				red_pom.push(obj.red[i].desni);
 			}
 		}
 
-		obj.red = [];
+		obj.red = [ ];
 		obj.red = red_pom;
 	}
 }
@@ -510,27 +422,27 @@ function citanjeReda(obj) {
 }
 
 function rekurzijaPrefiks(cvor, obj) {
-	if(cvor == null) return;
+	if (cvor == null) return;
 	obj.ispis += cvor.tekstSadrzaj;
 	rekurzijaPrefiks(cvor.levi, obj);
 	rekurzijaPrefiks(cvor.desni, obj);
 }
 
 function rekurzijaPostfiks(cvor, obj) {
-	if(cvor == null) return;
+	if (cvor == null) return;
 	rekurzijaPostfiks(cvor.levi, obj);
 	rekurzijaPostfiks(cvor.desni, obj);
 	obj.ispis += cvor.tekstSadrzaj;
 }
 
 function rekurzijaInfiks(cvor) {
-	if(cvor == null) return "";
+	if (cvor == null) return "";
 	
 	let cvString    = cvor.tekstSadrzaj;
 	let cvPrioritet = cvor.prioritet;
 	//console.log("cvString: " + cvString + " cvPrioritet: " + cvPrioritet);
 
-	if(cvPrioritet == 0) return cvString + cvPrioritet;
+	if (cvPrioritet == 0) return cvString + cvPrioritet;
 
 	let cvLeTekst = rekurzijaInfiks(cvor.levi);
 	let cvDeTekst = rekurzijaInfiks(cvor.desni); 
@@ -541,11 +453,11 @@ function rekurzijaInfiks(cvor) {
 	let cvDePrioritet   = cvDeTekst.charAt(cvDeTekst.length - 1);
 	cvDeTekst           = cvDeTekst.substring(0, cvDeTekst.length - 1);
 
-	if(cvLePrioritet == "1" && cvPrioritet == "2") {
+	if (cvLePrioritet == "1" && cvPrioritet == "2") {
 		cvLeTekst = "(" + cvLeTekst + ")";
 	}
 	
-	if(cvDePrioritet == "1" && cvPrioritet == "2"){
+	if (cvDePrioritet == "1" && cvPrioritet == "2"){
 		cvDeTekst = "(" + cvDeTekst + ")";
 	}
 
@@ -649,7 +561,7 @@ function crtanjeCvora(svgObjekat, cvor, platno, config) {
     let tekst       = document.createElementNS(config.svgNs, "text");
     let koordinataY = cvor.Y + ((cvor.tip == 1)? config.fontOffsetY1  : config.fontOffsetY2);
     
-    if(cvor.tekstSadrzaj == "g" || cvor.tekstSadrzaj == "p" ||
+    if (cvor.tekstSadrzaj == "g" || cvor.tekstSadrzaj == "p" ||
        cvor.tekstSadrzaj == "q" || cvor.tekstSadrzaj == "y" ||
        cvor.tekstSadrzaj == "c" || cvor.tekstSadrzaj == "e" ||
        cvor.tekstSadrzaj == "a") {
@@ -702,8 +614,8 @@ function parseAST(obj, platno, config) {
 	                2 * platno.marginaX +
 	                2 * config.krugPoluprecnik2) + "px";
 	platno.visina = (obj.stablo.visina * platno.razmakY + platno.offsetY) + "px";
-	console.log("PROVERA")
-	console.log(obj)
+	// console.log("PROVERA")
+	// console.log(obj)
 	
 	svg1.setAttribute("width",  platno.sirina);
 	svg1.setAttribute("height", platno.visina);
@@ -717,5 +629,4 @@ function parseAST(obj, platno, config) {
 document.getElementById("forma_ast_svg_izraz").addEventListener("focus", iskljucivanjePrecica)
 document.getElementById("forma_ast_svg_izraz").addEventListener("blur",  ukljucivanjePrecica)
 document.getElementById("dugme_ast_pokretanje").addEventListener("click", ( ) => { parseAST(STRUCT, SVG_PLATNO, CONFIG) } )
-
 
