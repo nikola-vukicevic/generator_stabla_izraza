@@ -6,6 +6,6 @@ JS generator Stabla izraza (sa opcijama za pretvaranje infiksnog zapisa u stablo
 
 ## demo
 
-https://www.codeblog.rs/generator_stabla_izraza.php
+https://codeblog.rs/generator_stabla_izraza
 
 Copyright (C) 2020. Nikola Vukićević
